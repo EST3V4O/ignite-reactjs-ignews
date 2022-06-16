@@ -49,7 +49,8 @@ export default NextAuth({
         }
       }
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user }) {
+
       const { email } = user
 
       try {
@@ -77,9 +78,10 @@ export default NextAuth({
         )
 
         return true
-      } catch {
+      } catch (e) {
+        console.log(e)
         return false
       }
-    },
+    }
   }
 })
