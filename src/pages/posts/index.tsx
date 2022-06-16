@@ -1,9 +1,8 @@
-import { GetStaticProps } from 'next'
+import { GetServerSideProps } from 'next'
 import Head from 'next/head'
+import { getPrismicClient } from '../../services/prismic'
 import Prismic from '@prismicio/client'
 import { RichText } from 'prismic-dom'
-
-import { getPrismicClient } from '../../services/prismic'
 
 import styles from './styles.module.scss'
 import Link from 'next/link'
@@ -16,15 +15,13 @@ type Post = {
 }
 
 interface PostsProps {
-  posts: Post[]
+  posts: Post[];
 }
 
 export default function Posts({ posts }: PostsProps) {
   return (
     <>
-      <Head>
-        <title>Posts | Ignews</title>
-      </Head>
+      <Head>Posts | Ignews</Head>
 
       <main className={styles.container}>
         <div className={styles.posts}>
@@ -43,22 +40,23 @@ export default function Posts({ posts }: PostsProps) {
   )
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const prismic = getPrismicClient()
 
   const response = await prismic.query([
-    Prismic.predicates.at("document.type", "publication")
+    Prismic.predicates.at('document.type', 'publication')
   ], {
     fetch: ["publication.title", "publication.content"],
-    pageSize: 100,
+    pageSize: 100
   })
 
   const posts = response.results.map(post => {
+    const data = post.data as any
     return {
       slug: post.uid,
-      title: RichText.asText(post.data.title),
-      excerpt: post.data.content.find(content => content.type === "paragraph")?.text ?? "",
-      updatedAt: new Date(post.last_publication_date).toLocaleDateString("pt-BR", {
+      title: RichText.asText(data.title as any),
+      excerpt: data.content.find(content => content.type === "paragraph")?.text ?? 1,
+      updatedAt: new Date(post.last_publication_date).toLocaleDateString('pt-BR', {
         day: "2-digit",
         month: "long",
         year: "numeric"
@@ -67,7 +65,7 @@ export const getStaticProps: GetStaticProps = async () => {
   })
 
   return {
-    props: {
+    props:{
       posts
     }
   }
